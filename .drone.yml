@@ -1,0 +1,30 @@
+kind: pipeline
+name: azure-function-stack
+type: docker
+
+platform:
+  os: linux
+  arch: arm64
+
+steps:
+- name: build-af-runtime
+  image: docker
+  commands:
+    # Build the base image:
+  - docker build -f azure-functions.Dockerfile -t azure-functions:dotnet-4-arm64 .
+  volumes:
+  - name: docker_socket
+    path: /var/run/docker.sock
+  
+- name: deploy
+  image: linuxserver/docker-compose
+  commands:
+  - docker-compose up --build --force-recreate -d azure-function
+  volumes:
+  - name: docker_socket
+    path: /var/run/docker.sock
+
+volumes:
+- name: docker_socket
+  host:
+    path: /var/run/docker.sock
